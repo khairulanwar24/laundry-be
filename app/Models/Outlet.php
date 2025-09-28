@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Outlet extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'owner_user_id',
+        'name',
+        'logo_path',
+        'address',
+        'phone',
+        'is_active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    public function userOutlets(): HasMany
+    {
+        return $this->hasMany(UserOutlet::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_outlets')
+            ->withPivot(['role', 'permissions_json', 'is_active'])
+            ->withTimestamps();
+    }
+
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(PaymentMethod::class);
+    }
+
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    public function serviceVariants(): HasMany
+    {
+        return $this->hasMany(ServiceVariant::class, 'service_id')
+            ->whereHas('service', function ($query) {
+                $query->where('outlet_id', $this->id);
+            });
+    }
+
+    public function perfumes(): HasMany
+    {
+        return $this->hasMany(Perfume::class);
+    }
+
+    public function discounts(): HasMany
+    {
+        return $this->hasMany(Discount::class);
+    }
+}

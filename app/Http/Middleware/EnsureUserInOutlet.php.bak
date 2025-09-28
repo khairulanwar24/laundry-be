@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\Outlet;
+use App\Support\ResponseJson;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureUserInOutlet
+{
+    use ResponseJson;
+
+    /**
+     * Handle an incoming request.
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return $this->unauthorized('Anda harus login terlebih dahulu');
+        }
+
+        // Get outlet from route parameter
+        $outlet = $request->route('outlet');
+
+        if (!$outlet) {
+            return $this->badRequest('Parameter outlet tidak ditemukan');
+        }
+
+        // If outlet is just an ID, load the model
+        if (!$outlet instanceof Outlet) {
+            $outlet = Outlet::find($outlet);
+
+            if (!$outlet) {
+                return $this->notFound('Outlet tidak ditemukan');
+            }
+        }
+
+        // Check if user is a member of this outlet
+        $userOutlet = $user->userOutlets()
+            ->where('outlet_id', $outlet->id)
+            ->where('is_active', true)
+            ->first();
+
+        // Debug: Log to see what's happening
+        if (app()->environment('testing')) {
+            $allUserOutlets = $user->userOutlets()->get();
+            $message = sprintf(
+                "EnsureUserInOutlet Debug: user_id=%d, outlet_id=%d, userOutlet_found=%s, all_user_outlets=%d, raw_query=%s",
+                $user->id,
+                $outlet->id,
+                $userOutlet ? 'yes' : 'no',
+                $allUserOutlets->count(),
+                $user->userOutlets()->where('outlet_id', $outlet->id)->where('is_active', true)->toSql()
+            );
+            
+            echo $message . "\n";
+            
+            // Show all user outlets for debug
+            foreach ($allUserOutlets as $uo) {
+                echo "UserOutlet: user_id={$uo->user_id}, outlet_id={$uo->outlet_id}, is_active={$uo->is_active}\n";
+            }
+        }
+
+        if (!$userOutlet) {
+            return $this->forbidden('Anda tidak terdaftar di outlet ini');
+        }
+
+        // Add the user outlet relationship to the request for easy access
+        $request->merge(['userOutlet' => $userOutlet]);
+
+        return $next($request);
+    }
+}

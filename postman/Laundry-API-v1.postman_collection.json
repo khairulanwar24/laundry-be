@@ -1,0 +1,931 @@
+{
+  "info": {
+    "_postman_id": "laundry-api-v1-collection",
+    "name": "Laundry API v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Comprehensive API collection for Laravel Laundry Multi-Outlet."
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/register", "host": [ "{{base_url}}" ], "path": [ "auth", "register" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Owner Demo\",\n  \"email\": \"owner@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Response has data.token', function () { pm.expect(json.data && json.data.token).to.be.a('string'); });",
+                  "if (json.data && json.data.token) { pm.environment.set('token', json.data.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/login", "host": [ "{{base_url}}" ], "path": [ "auth", "login" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Me",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + pm.environment.get('token') });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/me", "host": [ "{{base_url}}" ], "path": [ "auth", "me" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + pm.environment.get('token') });"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": [ "{{base_url}}" ], "path": [ "auth", "logout" ] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Outlets",
+      "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+      "item": [
+        {
+          "name": "List My Outlets",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets", "host": [ "{{base_url}}" ], "path": [ "outlets" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Outlet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets", "host": [ "{{base_url}}" ], "path": [ "outlets" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Outlet Jaya Laundry\",\n  \"address\": \"Jl. Sudirman No. 1\",\n  \"phone\": \"08123456789\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Outlet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Outlet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Outlet Jaya Laundry Updated\",\n  \"address\": \"Jl. Sudirman No. 2\",\n  \"phone\": \"08123456780\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invite Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/invite", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "invite" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff@example.com\",\n  \"role\": \"staff\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payment Methods",
+      "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+      "item": [
+        {
+          "name": "List Payment Methods",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/payment-methods", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "payment-methods" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Payment Method",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });",
+                  "if (json.data && json.data.id) { pm.environment.set('payment_method_id', json.data.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/payment-methods", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "payment-methods" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cash\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Payment Method",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/payment-methods/{{payment_method_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "payment-methods", "{{payment_method_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Transfer Bank\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Payment Method",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/payment-methods/{{payment_method_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "payment-methods", "{{payment_method_id}}" ] }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Master Catalog",
+      "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+      "item": [
+        {
+          "name": "Services: List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/services?q=", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "services" ], "query": [ { "key": "q", "value": "" } ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Services: Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/services", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "services" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cuci Kering\",\n  \"unit\": \"kg\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Services: Update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/services/{{service_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "services", "{{service_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cuci Kering Express\",\n  \"unit\": \"kg\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Variants: Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/services/{{service_id}}/variants", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "services", "{{service_id}}", "variants" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Reguler\",\n  \"price\": 7000,\n  \"min_qty\": 2,\n  \"duration\": 24\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Variants: Update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/service-variants/{{variant_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "service-variants", "{{variant_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Express\",\n  \"price\": 10000,\n  \"min_qty\": 1,\n  \"duration\": 12\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfumes: List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/perfumes", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "perfumes" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfumes: Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/perfumes", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "perfumes" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lavender\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfumes: Update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/perfumes/{{perfume_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "perfumes", "{{perfume_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rose\",\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Discounts: List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/discounts", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "discounts" ] }
+          },
+          "response": []
+        },
+        {
+          "name": "Discounts: Create",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/discounts", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "discounts" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Diskon Member\",\n  \"type\": \"percentage\",\n  \"value\": 10,\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Discounts: Update",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/outlets/{{outlet_id}}/discounts/{{discount_id}}", "host": [ "{{base_url}}" ], "path": [ "outlets", "{{outlet_id}}", "discounts", "{{discount_id}}" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Diskon Member Updated\",\n  \"type\": \"percentage\",\n  \"value\": 15,\n  \"is_active\": true\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+      "item": [
+        {
+          "name": "List Orders by Tab",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders?tab=antrian",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders" ],
+              "query": [ { "key": "tab", "value": "antrian" } ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });",
+                  "if (json.data && json.data.id) { pm.environment.set('order_id', json.data.id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": 1,\n  \"items\": [\n    {\n      \"service_variant_id\": 1,\n      \"qty\": 2.5\n    }\n  ],\n  \"perfume_id\": 1,\n  \"notes\": \"Cuci cepat, handle with care\",\n  \"discount_value_snapshot\": 5000\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Show Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders/{{order_id}}",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders", "{{order_id}}" ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Order Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders/{{order_id}}/status",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders", "{{order_id}}", "status" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"proses\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pay Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders/{{order_id}}/pay",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders", "{{order_id}}", "pay" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"payment_method_id\": {{payment_method_id}},\n  \"amount\": 20000\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pickup Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/orders/{{order_id}}/pickup",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "orders", "{{order_id}}", "pickup" ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Diambil oleh customer\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+      "item": [
+        {
+          "name": "Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.test('Envelope success', function () { pm.expect(json.success).to.eql(true); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/outlets/{{outlet_id}}/dashboard/summary",
+              "host": [ "{{base_url}}" ],
+              "path": [ "outlets", "{{outlet_id}}", "dashboard", "summary" ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
